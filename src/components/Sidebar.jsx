@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import "../styles/sidebar.css";
 import logo from "../assets/Vector.svg";
@@ -14,13 +13,14 @@ import { AiOutlineFileDone } from "react-icons/ai";
 export default function Sidebar() {
   const location = useLocation();
 
-  const [subjectOpen, setSubjectOpen] = useState(false);
-
+  // Match /subjects/:subjectId
   const subjectMatch = location.pathname.match(
     /^\/subjects\/([^/]+)/
   );
 
   const subjectId = subjectMatch ? subjectMatch[1] : null;
+
+  const isInsideSpecificSubject = !!subjectId;
 
   return (
     <aside className="sidebar">
@@ -42,20 +42,16 @@ export default function Sidebar() {
           Dashboard
         </NavLink>
 
-        {/* SUBJECT DROPDOWN TOGGLE */}
-        <div
-          className="sidebar__link"
-          onClick={() => setSubjectOpen(!subjectOpen)}
-          style={{ cursor: "pointer" }}
-        >
+        {/* Subject list */}
+        <NavLink className="sidebar__link" to="/subjects">
           <span className="sidebar__icon">
             <BsBook />
           </span>
           Subject
-        </div>
+        </NavLink>
 
-        {/* SUBMENU */}
-        {subjectOpen && subjectId && (
+        {/* Show dropdown ONLY when inside a specific subject */}
+        {isInsideSpecificSubject && (
           <div className="sidebar__subMenu">
             <NavLink
               className="sidebar__subLink"
