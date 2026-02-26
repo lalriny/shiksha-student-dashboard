@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { LiveKitRoom, RoomAudioRenderer } from "@livekit/components-react";
-import api from "../api";
+import api from "../api/apiClient";
 import ClassroomUI from "../components/ClassroomUI";
 import TeacherControls from "../components/TeacherControls";
 

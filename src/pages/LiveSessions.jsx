@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import api from "../api";
+import api from "../api/apiClient";
 import "../styles/liveSessions.css";
 
 export default function LiveSessions() {
@@ -103,4 +103,4 @@ export default function LiveSessions() {
       </div>
     </div>
   );
-}
+}6
