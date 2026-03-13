@@ -15,14 +15,15 @@ export default function RecordingsList() {
   useEffect(() => {
     const fetchRecordings = async () => {
       try {
-        const res = await api.get(`/subjects/${subjectId}/recordings/`);
+        // ✅ Correct API path
+        const res = await api.get(`/courses/subjects/${subjectId}/recordings/`);
         setRecordingsData(res.data || []);
       } catch (err) {
         console.error("Failed to load recordings", err);
       }
     };
 
-    fetchRecordings();
+    if (subjectId) fetchRecordings();
   }, [subjectId]);
 
   const filteredRecordings = recordingsData.filter((item) =>
