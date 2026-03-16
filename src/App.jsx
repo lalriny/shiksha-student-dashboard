@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CourseProvider } from "./contexts/CourseContext";
 
@@ -49,27 +49,25 @@ export default function App() {
               {/* SUBJECTS */}
               <Route path="subjects" element={<Subjects />} />
 
-              {/* Redirect old assignments route */}
-              <Route path="assignments" element={<Navigate to="/subjects" replace />} />
-
               {/* SUBJECT DETAILS */}
               <Route
                 path="subjects/:subjectId"
                 element={<SubjectDetails />}
               />
 
-              {/* ===== ASSIGNMENTS ===== */}
+              {/* ASSIGNMENTS (GLOBAL LIST) */}
               <Route
-                path="subjects/:subjectId/assignments"
+                path="assignments"
                 element={<SubjectsAssignments />}
               />
 
+              {/* ASSIGNMENT DETAIL */}
               <Route
                 path="subjects/:subjectId/assignments/:assignmentId"
                 element={<AssignmentDetail />}
               />
 
-              {/* ===== QUIZ ===== */}
+              {/* QUIZ */}
               <Route path="subjects/quiz" element={<SubjectsQuiz />} />
 
               <Route
@@ -87,7 +85,7 @@ export default function App() {
                 element={<QuizResult />}
               />
 
-              {/* ===== RECORDINGS ===== */}
+              {/* RECORDINGS */}
               <Route
                 path="subjects/recordings"
                 element={<SubjectsRecordings />}
@@ -103,7 +101,7 @@ export default function App() {
                 element={<RecordingDetail />}
               />
 
-              {/* ===== STUDY MATERIAL ===== */}
+              {/* STUDY MATERIAL */}
               <Route
                 path="study-material"
                 element={<SubjectsStudyMaterial />}
@@ -114,7 +112,7 @@ export default function App() {
                 element={<StudyMaterialList />}
               />
 
-              {/* ===== LIVE SESSIONS ===== */}
+              {/* LIVE SESSIONS */}
               <Route
                 path="live-sessions"
                 element={<LiveSessions />}
