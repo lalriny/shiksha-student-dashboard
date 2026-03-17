@@ -1,11 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import "../styles/assignmentPending.css";
 
-export default function AssignmentPendingCard({ id, title, teacher, deadline }) {
+export default function AssignmentPendingCard({ 
+  id, 
+  subjectId,   // ✅ ADD THIS
+  title, 
+  teacher, 
+  deadline 
+}) {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/assignments/${id}`);
+    navigate(`/subjects/${subjectId}/assignments/${id}`);
   };
 
   return (
