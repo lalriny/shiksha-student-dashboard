@@ -17,6 +17,10 @@ export default function QuizList() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // ✅ NEW STATES (added)
+  const [showModal, setShowModal] = useState(false);
+  const [selectedQuiz, setSelectedQuiz] = useState(null);
+
   useEffect(() => {
     if (tab) setActiveTab(tab);
   }, [tab]);
@@ -59,12 +63,20 @@ export default function QuizList() {
 
   const quizzes = activeTab === "pending" ? pendingQuizzes : completedQuizzes;
 
+  // ✅ MODIFIED CLICK HANDLER
   const handleQuizClick = (quiz) => {
     if (activeTab === "pending") {
-      navigate(`/subjects/quiz/${subjectId}/take/${quiz.id}`);
+      setSelectedQuiz(quiz);
+      setShowModal(true);
     } else {
       navigate(`/subjects/quiz/${subjectId}/result/${quiz.id}`);
     }
+  };
+
+  // ✅ CONFIRM FUNCTION (added)
+  const confirmStartQuiz = () => {
+    navigate(`/subjects/quiz/${subjectId}/take/${selectedQuiz.id}`);
+    setShowModal(false);
   };
 
   if (loading) return <div>Loading quizzes...</div>;
@@ -124,6 +136,31 @@ export default function QuizList() {
           })()}
         </div>
       </div>
+
+      {/* ✅ MODAL UI (added) */}
+      {showModal && (
+        <div className="quizModalOverlay">
+          <div className="quizModalBox">
+            <h3>Start Quiz?</h3>
+            <p>
+              You are about to start <b>{selectedQuiz?.title}</b>
+              <br /><br />
+              ⏱ Time will start immediately  
+              <br />
+              🚫 You cannot pause the quiz
+            </p>
+
+            <div className="quizModalActions">
+              <button className="startBtn" onClick={confirmStartQuiz}>
+                Start
+              </button>
+              <button className="cancelBtn" onClick={() => setShowModal(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

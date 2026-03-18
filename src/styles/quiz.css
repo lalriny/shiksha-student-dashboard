@@ -709,4 +709,48 @@
   .quizActiveBodyBox {
     padding: 18px;
   }
+
+  .quizModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.quizModalBox {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 320px;
+  text-align: center;
+}
+
+.quizModalActions {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.startBtn {
+  background: #2f7d84;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  background: #ccc;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
 }
