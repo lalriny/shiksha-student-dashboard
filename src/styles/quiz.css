@@ -710,11 +710,8 @@
     padding: 18px;
   }
 
-
-
-
-
-  /* ---Quiz start popup message--- */
+}
+ /* ---Quiz start popup message--- */
 
   .quizModalOverlay {
   position: fixed;
@@ -792,4 +789,5 @@
     transform: translateY(0);
   }
 }
-}
+
+
