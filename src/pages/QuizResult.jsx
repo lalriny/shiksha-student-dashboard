@@ -11,6 +11,14 @@ export default function QuizResult() {
   const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [openExplanation, setOpenExplanation] = useState({});
+  const toggleExplanation = (id) => {
+
+  setOpenExplanation(prev => ({
+    ...prev,
+     [id]: !prev[id]
+   }));
+  };
 
   useEffect(() => {
     async function fetchResult() {
@@ -77,6 +85,21 @@ export default function QuizResult() {
                   </span>
                 </div>
               </div>
+
+              <button
+                onClick={() => toggleExplanation(q.id)}
+                style={{ marginTop: "8px" }}
+              >
+                {openExplanation[q.id] ? "Hide Explanation" : "Show Explanation"}
+              </button>
+
+              {openExplanation[q.id] && (
+                <div style={{ marginTop: "10px", padding: "8px", background: "#f5f5f5", borderRadius: "6px" }}>
+                  <strong>Explanation:</strong>
+                  <p>{q.explanation}</p>
+                </div>
+              )}
+
             </div>
           ))}
         </div>
