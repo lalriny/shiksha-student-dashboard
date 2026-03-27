@@ -123,6 +123,7 @@ export default function QuizDetail() {
 
       navigate(`/subjects/quiz/${subjectId}/result/${quizId}`);
     } catch (err) {
+      console.log("FULL ERROR:", err.response?.data); 
       setError(err.response?.data?.detail || "Failed to submit quiz.");
     } finally {
       setSubmitting(false);
