@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/apiClient";
-import "./QuizDetail.css";
+import "../styles/QuizDetail.css";
 
 const S = {
   NOT_VISITED:     "nv",
