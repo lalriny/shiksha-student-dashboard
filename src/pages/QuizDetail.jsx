@@ -114,7 +114,7 @@ export default function QuizDetail() {
         setTimeLeft(remaining);
       }
     }, 1000);
-    return () => clearInterval(interval);
+return () =npm> clearInterval(interval);
   }, [handleAutoSubmit]);
 
   const fmtTime = (s) => {
