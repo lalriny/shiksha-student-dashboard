@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/apiClient";
 import PageHeader from "../components/PageHeader";
+import CompletedAssignment from "../components/CompletedAssignment"; // ✅ ONLY ADD
 import "../styles/assignmentDetail.css";
 
 export default function AssignmentDetail() {
@@ -197,84 +198,46 @@ export default function AssignmentDetail() {
               </button>
             </div>
           ) : (
-            /* ================= NEW COMPLETED UI ================= */
-            <div className="completedGrid">
+            /* ✅ ONLY THIS BLOCK CHANGED */
+            <CompletedAssignment
+              assignment={{
+                title: assignment.title,
+                subject: assignment.subject,
+                chapter: assignment.chapter,
+                teacher: assignment.teacher,
+                className: assignment.class_name,
 
-              {/* LEFT CARD */}
-              <div className="completedCard">
-                <p className="completedBadge">✓ Completed</p>
+                description: assignment.description,
 
-                <h3 className="completedTitle">{assignment.title}</h3>
+                assignedOn: new Date(
+                  assignment.created_at || assignment.due_date
+                ).toLocaleDateString(),
 
-                <p className="completedMeta">
-                  {assignment.chapter || "Chapter"} — {assignment.subject || "Subject"}
-                </p>
+                dueDate: new Date(assignment.due_date).toLocaleDateString(),
 
-                <p className="completedDesc">
-                  {assignment.description}
-                </p>
-              </div>
+                teacherFile: {
+                  name: assignment.attachment?.split("/").pop(),
+                  size: "—",
+                  url: assignment.attachment,
+                },
 
-              {/* CENTER CARD */}
-              <div className="completedCard completedCard--center">
-                <h4 className="completedSectionTitle">Assignment Details</h4>
+                submittedOn: formatSmallDate(submittedAt),
 
-                <div className="completedDetailsGrid">
-                  <div>
-                    <span>Assigned on</span>
-                    <p>
-                      {new Date(
-                        assignment.created_at || assignment.due_date
-                      ).toLocaleDateString()}
-                    </p>
-                  </div>
+                submissionStatus: "On time",
 
-                  <div>
-                    <span>Due date</span>
-                    <p>{new Date(assignment.due_date).toLocaleDateString()}</p>
-                  </div>
-
-                  <div>
-                    <span>Subject</span>
-                    <p>{assignment.subject || "-"}</p>
-                  </div>
-
-                  <div>
-                    <span>Teacher</span>
-                    <p>{assignment.teacher || "-"}</p>
-                  </div>
-                </div>
-
-                {assignment.attachment && (
-                  <div
-                    className="completedFileRow"
-                    onClick={handleOpenAttachment}
-                  >
-                    <span className="fileIcon">📄</span>
-                    <span className="fileName">
-                      {assignment.attachment.split("/").pop()}
-                    </span>
-                    <button className="viewBtn">View</button>
-                  </div>
-                )}
-              </div>
-
-              {/* RIGHT CARD */}
-              <div className="completedCard">
-                <h4 className="completedSectionTitle">Your Submission</h4>
-
-                <p className="submissionDate">
-                  Submitted on {formatSmallDate(submittedAt)}
-                </p>
-
-                <p className="submissionStatus">On time</p>
-
-                <button className="openFileBtn" onClick={handleOpenFile}>
-                  View Submitted File
-                </button>
-              </div>
-
-            </div>
+                submittedFile: {
+                  name:
+                    assignment?.submitted_file?.split("/").pop() ||
+                    "Submitted File",
+                  size: "—",
+                  type: "Document",
+                  url:
+                    assignment?.submitted_file ||
+                    assignment?.file ||
+                    assignment?.submission_file,
+                },
+              }}
+            />
           )}
 
         </div>
