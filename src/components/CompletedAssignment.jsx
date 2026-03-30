@@ -1,4 +1,4 @@
-import "../styles/CompletedAssignment.css";
+import "./CompletedAssignment.css";
 
 const CompletedAssignment = ({ assignment }) => {
   const {
