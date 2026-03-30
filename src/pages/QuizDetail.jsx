@@ -240,12 +240,7 @@ console.log("DURATION:", durationRef.current);
             ))}
           </div>
 
-          {/* Explanation (if available) */}
-          {q.explanation && (
-            <div className="quiz-explanation">
-              <strong>Explanation:</strong> {q.explanation}
-            </div>
-          )}
+        
 
           {/* Action bar — Clear Response + Previous / Next */}
           <div className="quiz-action-bar">
