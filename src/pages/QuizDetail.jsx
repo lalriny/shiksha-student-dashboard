@@ -95,25 +95,30 @@ export default function QuizDetail() {
   }, [quizId, subjectId, navigate]);
 
   // ── timer ─────────────────────────────────────────────────────────────────
+  const timerStarted = useRef(false);
+
   useEffect(() => {
-    if (timeLeft === null) return;
-    if (timeLeft <= 0) {
-      if (!submittedRef.current) { submittedRef.current = true; handleAutoSubmit(); }
-      return;
-    }
+    // Wait until initQuiz has populated both refs and set timeLeft
+    if (timeLeft === null || timerStarted.current) return;
+    timerStarted.current = true;
+
     const interval = setInterval(() => {
       const elapsed   = Math.floor((Date.now() - startTimeRef.current) / 1000);
       const remaining = durationRef.current - elapsed;
       if (remaining <= 0) {
         clearInterval(interval);
         setTimeLeft(0);
-        if (!submittedRef.current) { submittedRef.current = true; handleAutoSubmit(); }
+        if (!submittedRef.current) {
+          submittedRef.current = true;
+          handleAutoSubmit();
+        }
       } else {
         setTimeLeft(remaining);
       }
     }, 1000);
+
     return () => clearInterval(interval);
-  }, [handleAutoSubmit]);
+  }, [timeLeft, handleAutoSubmit]);
 
   const fmtTime = (s) => {
     const h   = String(Math.floor(s / 3600)).padStart(2, "0");
