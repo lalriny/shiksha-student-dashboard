@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/apiClient";
 import PageHeader from "../components/PageHeader";
+import CompletedAssignment from "../components/CompletedAssignment";
 import "../styles/assignmentDetail.css";
 
 export default function AssignmentDetail() {
@@ -28,7 +29,10 @@ export default function AssignmentDetail() {
 
         setAssignment(data);
 
-        if (data.submission_status === "SUBMITTED") {
+        if (
+          data.submission_status === "SUBMITTED" ||
+          data.status === "SUBMITTED"
+        ) {
           setIsSubmitted(true);
           setSubmittedAt(
             data.submitted_at ? new Date(data.submitted_at) : null
@@ -49,10 +53,29 @@ export default function AssignmentDetail() {
   }, [assignmentId]);
 
   const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) setUploadedFile(file);
-  };
+  const file = e.target.files[0];
+  if (!file) return;
 
+  const allowedMimeTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ];
+
+  const allowedExtensions = [".pdf", ".doc", ".docx"];
+
+  const fileName = file.name.toLowerCase();
+
+  const isValidMime = allowedMimeTypes.includes(file.type);
+  const isValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+  if (!isValidMime && !isValidExtension) {
+    alert("Only PDF, DOC, and DOCX files are allowed.");
+    return;
+  }
+
+  setUploadedFile(file);
+};
   const handleSubmit = async () => {
     if (!uploadedFile) return;
 
@@ -79,40 +102,14 @@ export default function AssignmentDetail() {
     }
   };
 
-  // ✅ FIX: open student submitted file
-  const handleOpenFile = () => {
-    if (assignment?.submitted_file) {
-      window.open(assignment.submitted_file, "_blank");
-    }
-  };
-
-  // ✅ FIX: open teacher attachment
   const handleOpenAttachment = () => {
     if (assignment?.attachment) {
       window.open(assignment.attachment, "_blank");
     }
   };
 
-  const formatSubmittedTop = (dateObj) => {
-    if (!dateObj) return "";
-    const d = dateObj.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-
-    const t = dateObj.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-
-    return `Submitted: ${d} / ${t}`;
-  };
-
   const formatSmallDate = (dateObj) => {
     if (!dateObj) return "";
-
     return dateObj.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
@@ -131,100 +128,144 @@ export default function AssignmentDetail() {
       </button>
 
       <div className="assignmentDetailHeaderBox">
-        <PageHeader title={assignment.subject || assignment.title} />
+        {/* ✅ FIXED */}
+        <PageHeader title={assignment.subject_name || assignment.title} />
       </div>
 
       <div className="assignmentDetailBodyBox">
         <div className="assignmentDetailContent">
 
-          {/* LEFT SIDE */}
-          <div className="assignmentDetailLeft">
-            <div className="assignmentTitleRow">
-              <h3 className="assignmentDetailTitle">Assignment</h3>
-
-              {isSubmitted && (
-                <p className="submittedTopText">
-                  {formatSubmittedTop(submittedAt)}
-                </p>
-              )}
-            </div>
-
-            <p className="assignmentDetailDue">
-              Due Date:{" "}
-              {new Date(assignment.due_date).toLocaleDateString("en-GB")}
-            </p>
-
-            <div className="assignmentDetailDivider" />
-
-            <p className="assignmentDetailLabel">
-              Title: {assignment.title}
-            </p>
-
-            <p className="assignmentDetailDesc">
-              Description: {assignment.description}
-            </p>
-
-            {/* ✅ FIX: clickable teacher file */}
-            {assignment.attachment && (
-              <div className="fileStrip" onClick={handleOpenAttachment}>
-                <div className="fileStripIcon">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M14 2H6C5.46 2 4 3.46 4 4V20C4 21.53 5.46 22 6 22H18C19.53 22 20 20.53 20 20V8L14 2Z"
-                      stroke="#444"
-                      strokeWidth="2"
-                    />
-                    <path d="M14 2V8H20" stroke="#444" strokeWidth="2" />
-                  </svg>
-                </div>
-
-                <div className="fileStripName">
-                  {assignment.attachment.split("/").pop()}
-                </div>
+          {!isSubmitted && (
+            <div className="assignmentDetailLeft">
+              <div className="assignmentTitleRow">
+                <h3 className="assignmentDetailTitle">Assignment</h3>
               </div>
-            )}
-          </div>
 
-          {/* RIGHT SIDE */}
-          <div className="assignmentDetailRight">
-            <div className="yourWorkTop">
-              <h4 className="assignmentDetailWorkTitle">Your Work</h4>
+              <p className="assignmentDetailDue">
+                Due Date:{" "}
+                {new Date(assignment.due_date).toLocaleDateString("en-GB")}
+              </p>
 
-              {isSubmitted && (
-                <span className="yourWorkDate">
-                  {formatSmallDate(submittedAt)}
-                </span>
-              )}
+              <div className="assignmentDetailDivider" />
+
+              <p className="assignmentDetailLabel">
+                Title: {assignment.title}
+              </p>
+
+              <p className="assignmentDetailDesc">
+                Description: {assignment.description}
+              </p>
+
+              {assignment.attachment && (
+  <div>
+    <div className="fileStrip">
+      <div className="fileStripIcon">📄</div>
+      <div className="fileStripName">
+        {assignment.attachment.split("/").pop()}
+      </div>
+    </div>
+
+    <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+      <button
+        className="openFileBtn"
+        onClick={() => window.open(assignment.attachment, "_blank")}
+      >
+        View
+      </button>
+
+      <a
+        href={assignment.attachment}
+        download
+        className="openFileBtn"
+        style={{ textAlign: "center", display: "inline-block" }}
+      >
+        Download
+      </a>
+    </div>
+  </div>
+)}
             </div>
+          )}
 
-            {!isSubmitted ? (
-              <>
-                {/* ✅ FIX: show selected file name */}
-                <label className="assignmentDetailUploadBtn">
-                  <input type="file" hidden onChange={handleFileUpload} />
-                  {uploadedFile ? uploadedFile.name : "[Upload File]"}
-                </label>
+          {!isSubmitted ? (
+            <div className="assignmentDetailRight">
+              <div className="yourWorkTop">
+                <h4 className="assignmentDetailWorkTitle">Your Work</h4>
+              </div>
 
+              <label className="assignmentDetailUploadBtn">
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  hidden
+                  onChange={handleFileUpload}
+                />
+                {uploadedFile ? uploadedFile.name : "[Upload File]"}
+              </label>
+
+              {uploadedFile && (
                 <button
-                  className="assignmentDetailSubmitBtn"
-                  onClick={handleSubmit}
-                  disabled={!uploadedFile}
+                  className="openFileBtn"
+                  onClick={() => setUploadedFile(null)}
+                  style={{ marginBottom: "10px" }}
                 >
-                  Submit
+                  Cancel File
                 </button>
-              </>
-            ) : (
-              <>
-                <button className="openFileBtn" onClick={handleOpenFile}>
-                  [Open File]
-                </button>
+              )}
 
-                <button className="submittedBtn" disabled>
-                  Submitted
-                </button>
-              </>
-            )}
-          </div>
+              <button
+                className="assignmentDetailSubmitBtn"
+                onClick={handleSubmit}
+                disabled={!uploadedFile}
+              >
+                Submit
+              </button>
+            </div>
+          ) : (
+            <CompletedAssignment
+              assignment={{
+                title: assignment.title,
+
+                // ✅ FIXED MAPPING
+                subject: assignment.subject_name || "",
+                chapter: assignment.chapter_name || "",
+                teacher: assignment.teacher_name || "",
+
+                description: assignment.description,
+
+                // ✅ FIXED DATE
+                assignedOn: assignment.assigned_on
+                  ? new Date(assignment.assigned_on).toLocaleDateString("en-GB")
+                  : "",
+
+                dueDate: assignment.due_date
+                  ? new Date(assignment.due_date).toLocaleDateString("en-GB")
+                  : "",
+
+                teacherFile: assignment.attachment
+                  ? {
+                      name: assignment.attachment.split("/").pop(),
+                      size: "—",
+                      url: assignment.attachment,
+                    }
+                  : null,
+
+                submittedOn: formatSmallDate(submittedAt),
+
+                submissionStatus: assignment.submission_status_label || "",
+
+                // ✅ FIXED FILE (NO FALLBACKS)
+                submittedFile: assignment.submitted_file
+                  ? {
+                      name: assignment.submitted_file.split("/").pop(),
+                      size: "—",
+                      type: assignment.submitted_file.split(".").pop().toUpperCase(),
+                      url: assignment.submitted_file,
+                    }
+                  : null,
+              }}
+            />
+          )}
 
         </div>
       </div>

@@ -3,9 +3,10 @@ import "../styles/assignmentPending.css";
 
 export default function AssignmentPendingCard({ 
   id, 
-  subjectId,   // ✅ ADD THIS
+  subjectId,
   title, 
   teacher, 
+  chapter,
   deadline 
 }) {
   const navigate = useNavigate();
@@ -16,12 +17,30 @@ export default function AssignmentPendingCard({
 
   return (
     <div className="assignmentPendingCard" onClick={handleClick}>
+      
       <div className="assignmentPendingCard__top">
+        {/* ✅ LABEL ADDED */}
+        <p className="assignmentPendingCard__label">Title:</p>
         <p className="assignmentPendingCard__title">{title}</p>
       </div>
-      <p className="assignmentPendingCard__teacher">{teacher}</p>
+
+      {/* ✅ LABEL ADDED */}
+      {chapter && (
+        <p className="assignmentPendingCard__chapter">
+          <span className="assignmentPendingCard__label">Subject:</span> {chapter}
+        </p>
+      )}
+
+      {teacher && (
+        <p className="assignmentPendingCard__teacher">
+          <span className="assignmentPendingCard__label">Teacher:</span> {teacher}
+        </p>
+      )}
+
       <div className="assignmentPendingCard__bottom">
-        <p className="assignmentPendingCard__deadline">{deadline}</p>
+        <p className="assignmentPendingCard__deadline">
+          <span className="assignmentPendingCard__label">Due:</span> {deadline}
+        </p>
       </div>
     </div>
   );
