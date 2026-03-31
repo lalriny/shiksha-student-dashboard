@@ -236,12 +236,24 @@
 
 /* Header box */
 .quizResultHeaderBox {
-  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 50;
   background: white;
-  border-radius: 18px 18px 0 0;
-  padding: 20px 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+.quizResultHeaderInner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+.quizResultHeaderBtns {
+  display: flex;
+  gap: 8px;
+}
 .quizResultHeaderBox .pageHeader {
   padding-bottom: 0;
   margin-bottom: 0;
@@ -742,8 +754,7 @@
 
   width: 350px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-
-  animation: fadeIn 0.2s ease-in-out;
+  animation: scaleIn 0.2s ease;
 }
 
 .quizModalBox h3 {
@@ -994,4 +1005,15 @@
 
 .quizResultReattemptBtn:hover {
   background: #097a83;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9) translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
 }
