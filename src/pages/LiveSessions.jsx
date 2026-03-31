@@ -10,8 +10,8 @@ export default function LiveSessions() {
   const { activeCourse } = useCourse();
 
   const [sessions, setSessions] = useState([]);
-  const [subjects, setSubjects] = useState([]); // ✅ NEW
-  const [selectedSubject, setSelectedSubject] = useState(""); // ✅ NEW
+  const [subjects, setSubjects] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -28,12 +28,10 @@ export default function LiveSessions() {
       setError(null);
 
       try {
-        // ✅ fetch sessions
         const sessionRes = await api.get(
           `/livestream/student/sessions/?course_id=${activeCourse.id}`
         );
 
-        // ✅ fetch subjects
         const subjectRes = await api.get(
           `/courses/${activeCourse.id}/subjects/`
         );
@@ -62,16 +60,21 @@ export default function LiveSessions() {
       )
     : sessions;
 
-  // ✅ FORMATTERS
-  const formatIST = (dateString) => {
+  // ✅ FIXED FORMATTERS (NO timezone forcing)
+  const formatDateTime = (dateString) => {
     return new Date(dateString).toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
-  const formatTimeIST = (dateString) => {
+  const formatTime = (dateString) => {
     return new Date(dateString).toLocaleTimeString("en-IN", {
-      timeZone: "Asia/Kolkata",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -80,7 +83,7 @@ export default function LiveSessions() {
 
     if (status === "LIVE") return "🔴 Live Now";
     if (status === "SCHEDULED")
-      return `Starts at ${formatTimeIST(session.start_time)}`;
+      return `Starts at ${formatTime(session.start_time)}`;
     if (status === "COMPLETED") return "Completed";
     return status;
   };
@@ -99,7 +102,6 @@ export default function LiveSessions() {
           }
         />
 
-        {/* ✅ FILTER DROPDOWN */}
         <select
           value={selectedSubject}
           onChange={(e) => setSelectedSubject(e.target.value)}
@@ -148,7 +150,7 @@ export default function LiveSessions() {
                   <p className="liveCardText">{s.title}</p>
                   <p className="liveCardText">{s.teacher}</p>
                   <p className="liveCardText">
-                    {formatIST(s.start_time)}
+                    {formatDateTime(s.start_time)}
                   </p>
                   <p className="liveCardText">{formatStatus(s)}</p>
                 </div>

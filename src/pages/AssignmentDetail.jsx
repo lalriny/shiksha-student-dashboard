@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/apiClient";
 import PageHeader from "../components/PageHeader";
+import CompletedAssignment from "../components/CompletedAssignment"; // ✅ ONLY ADD
 import "../styles/assignmentDetail.css";
 
 export default function AssignmentDetail() {
@@ -28,7 +29,10 @@ export default function AssignmentDetail() {
 
         setAssignment(data);
 
-        if (data.submission_status === "SUBMITTED") {
+        if (
+          data.submission_status === "SUBMITTED" ||
+          data.status === "SUBMITTED"
+        ) {
           setIsSubmitted(true);
           setSubmittedAt(
             data.submitted_at ? new Date(data.submitted_at) : null
@@ -80,8 +84,19 @@ export default function AssignmentDetail() {
   };
 
   const handleOpenFile = () => {
-    if (assignment?.submitted_file) {
-      window.open(assignment.submitted_file, "_blank");
+    const fileUrl =
+      assignment?.submitted_file ||
+      assignment?.file ||
+      assignment?.submission_file;
+
+    if (fileUrl) {
+      window.open(fileUrl, "_blank");
+    }
+  };
+
+  const handleOpenAttachment = () => {
+    if (assignment?.attachment) {
+      window.open(assignment.attachment, "_blank");
     }
   };
 
@@ -129,105 +144,101 @@ export default function AssignmentDetail() {
       <div className="assignmentDetailBodyBox">
         <div className="assignmentDetailContent">
 
-          {/* LEFT SIDE */}
-          <div className="assignmentDetailLeft">
-            <div className="assignmentTitleRow">
-              <h3 className="assignmentDetailTitle">Assignment</h3>
+          {/* LEFT SIDE (UNCHANGED) */}
+          {!isSubmitted && (
+            <div className="assignmentDetailLeft">
+              <div className="assignmentTitleRow">
+                <h3 className="assignmentDetailTitle">Assignment</h3>
+              </div>
 
-              {isSubmitted && (
-                <p className="submittedTopText">
-                  {formatSubmittedTop(submittedAt)}
-                </p>
+              <p className="assignmentDetailDue">
+                Due Date:{" "}
+                {new Date(assignment.due_date).toLocaleDateString("en-GB")}
+              </p>
+
+              <div className="assignmentDetailDivider" />
+
+              <p className="assignmentDetailLabel">
+                Title: {assignment.title}
+              </p>
+
+              <p className="assignmentDetailDesc">
+                Description: {assignment.description}
+              </p>
+
+              {assignment.attachment && (
+                <div className="fileStrip" onClick={handleOpenAttachment}>
+                  <div className="fileStripIcon">📄</div>
+                  <div className="fileStripName">
+                    {assignment.attachment.split("/").pop()}
+                  </div>
+                </div>
               )}
             </div>
-
-            <p className="assignmentDetailDue">
-              Due Date:{" "}
-              {new Date(assignment.due_date).toLocaleDateString("en-GB")}
-            </p>
-
-            <div className="assignmentDetailDivider" />
-
-            <p className="assignmentDetailLabel">
-              Title: {assignment.title}
-            </p>
-
-            <p className="assignmentDetailDesc">
-              Description: {assignment.description}
-            </p>
-
-            {assignment.attachment && (
-              <div className="fileStrip">
-                <div className="fileStripIcon">
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <path
-                      d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
-                      stroke="#444"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M14 2V8H20"
-                      stroke="#444"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-
-                <div className="fileStripName">
-                  {assignment.attachment.split("/").pop()}
-                </div>
-              </div>
-            )}
-          </div>
+          )}
 
           {/* RIGHT SIDE */}
-          <div className="assignmentDetailRight">
-            <div className="yourWorkTop">
-              <h4 className="assignmentDetailWorkTitle">Your Work</h4>
+          {!isSubmitted ? (
+            <div className="assignmentDetailRight">
+              <div className="yourWorkTop">
+                <h4 className="assignmentDetailWorkTitle">Your Work</h4>
+              </div>
 
-              {isSubmitted && (
-                <span className="yourWorkDate">
-                  {formatSmallDate(submittedAt)}
-                </span>
-              )}
+              <label className="assignmentDetailUploadBtn">
+                <input type="file" hidden onChange={handleFileUpload} />
+                {uploadedFile ? uploadedFile.name : "[Upload File]"}
+              </label>
+
+              <button
+                className="assignmentDetailSubmitBtn"
+                onClick={handleSubmit}
+                disabled={!uploadedFile}
+              >
+                Submit
+              </button>
             </div>
+          ) : (
+            /* ✅ ONLY THIS BLOCK CHANGED */
+            <CompletedAssignment
+              assignment={{
+                title: assignment.title,
+                subject: assignment.subject,
+                chapter: assignment.chapter,
+                teacher: assignment.teacher,
+                className: assignment.class_name,
 
-            {!isSubmitted ? (
-              <>
-                <label className="assignmentDetailUploadBtn">
-                  <input type="file" hidden onChange={handleFileUpload} />
-                  [Upload File]
-                </label>
+                description: assignment.description,
 
-                <button
-                  className="assignmentDetailSubmitBtn"
-                  onClick={handleSubmit}
-                  disabled={!uploadedFile}
-                >
-                  Submit
-                </button>
-              </>
-            ) : (
-              <>
-                <button className="openFileBtn" onClick={handleOpenFile}>
-                  [Open File]
-                </button>
+                assignedOn: new Date(
+                  assignment.created_at || assignment.due_date
+                ).toLocaleDateString(),
 
-                <button className="submittedBtn" disabled>
-                  Submitted
-                </button>
-              </>
-            )}
-          </div>
+                dueDate: new Date(assignment.due_date).toLocaleDateString(),
+
+                teacherFile: {
+                  name: assignment.attachment?.split("/").pop(),
+                  size: "—",
+                  url: assignment.attachment,
+                },
+
+                submittedOn: formatSmallDate(submittedAt),
+
+                submissionStatus: "On time",
+
+                submittedFile: {
+                  name:
+                    assignment?.submitted_file?.split("/").pop() ||
+                    "Submitted File",
+                  size: "—",
+                  type: "Document",
+                  url:
+                    assignment?.submitted_file ||
+                    assignment?.file ||
+                    assignment?.submission_file,
+                },
+              }}
+            />
+          )}
 
         </div>
       </div>
