@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/apiClient";
 import PageHeader from "../components/PageHeader";
-import CompletedAssignment from "../components/CompletedAssignment"; // ✅ ONLY ADD
+import CompletedAssignment from "../components/CompletedAssignment";
 import "../styles/assignmentDetail.css";
 
 export default function AssignmentDetail() {
@@ -53,10 +53,29 @@ export default function AssignmentDetail() {
   }, [assignmentId]);
 
   const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) setUploadedFile(file);
-  };
+  const file = e.target.files[0];
+  if (!file) return;
 
+  const allowedMimeTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ];
+
+  const allowedExtensions = [".pdf", ".doc", ".docx"];
+
+  const fileName = file.name.toLowerCase();
+
+  const isValidMime = allowedMimeTypes.includes(file.type);
+  const isValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+  if (!isValidMime && !isValidExtension) {
+    alert("Only PDF, DOC, and DOCX files are allowed.");
+    return;
+  }
+
+  setUploadedFile(file);
+};
   const handleSubmit = async () => {
     if (!uploadedFile) return;
 
@@ -83,43 +102,14 @@ export default function AssignmentDetail() {
     }
   };
 
-  const handleOpenFile = () => {
-    const fileUrl =
-      assignment?.submitted_file ||
-      assignment?.file ||
-      assignment?.submission_file;
-
-    if (fileUrl) {
-      window.open(fileUrl, "_blank");
-    }
-  };
-
   const handleOpenAttachment = () => {
     if (assignment?.attachment) {
       window.open(assignment.attachment, "_blank");
     }
   };
 
-  const formatSubmittedTop = (dateObj) => {
-    if (!dateObj) return "";
-    const d = dateObj.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-
-    const t = dateObj.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-
-    return `Submitted: ${d} / ${t}`;
-  };
-
   const formatSmallDate = (dateObj) => {
     if (!dateObj) return "";
-
     return dateObj.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
@@ -138,13 +128,13 @@ export default function AssignmentDetail() {
       </button>
 
       <div className="assignmentDetailHeaderBox">
-        <PageHeader title={assignment.subject || assignment.title} />
+        {/* ✅ FIXED */}
+        <PageHeader title={assignment.subject_name || assignment.title} />
       </div>
 
       <div className="assignmentDetailBodyBox">
         <div className="assignmentDetailContent">
 
-          {/* LEFT SIDE (UNCHANGED) */}
           {!isSubmitted && (
             <div className="assignmentDetailLeft">
               <div className="assignmentTitleRow">
@@ -167,17 +157,36 @@ export default function AssignmentDetail() {
               </p>
 
               {assignment.attachment && (
-                <div className="fileStrip" onClick={handleOpenAttachment}>
-                  <div className="fileStripIcon">📄</div>
-                  <div className="fileStripName">
-                    {assignment.attachment.split("/").pop()}
-                  </div>
-                </div>
-              )}
+  <div>
+    <div className="fileStrip">
+      <div className="fileStripIcon">📄</div>
+      <div className="fileStripName">
+        {assignment.attachment.split("/").pop()}
+      </div>
+    </div>
+
+    <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+      <button
+        className="openFileBtn"
+        onClick={() => window.open(assignment.attachment, "_blank")}
+      >
+        View
+      </button>
+
+      <a
+        href={assignment.attachment}
+        download
+        className="openFileBtn"
+        style={{ textAlign: "center", display: "inline-block" }}
+      >
+        Download
+      </a>
+    </div>
+  </div>
+)}
             </div>
           )}
 
-          {/* RIGHT SIDE */}
           {!isSubmitted ? (
             <div className="assignmentDetailRight">
               <div className="yourWorkTop">
@@ -185,9 +194,24 @@ export default function AssignmentDetail() {
               </div>
 
               <label className="assignmentDetailUploadBtn">
-                <input type="file" hidden onChange={handleFileUpload} />
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  hidden
+                  onChange={handleFileUpload}
+                />
                 {uploadedFile ? uploadedFile.name : "[Upload File]"}
               </label>
+
+              {uploadedFile && (
+                <button
+                  className="openFileBtn"
+                  onClick={() => setUploadedFile(null)}
+                  style={{ marginBottom: "10px" }}
+                >
+                  Cancel File
+                </button>
+              )}
 
               <button
                 className="assignmentDetailSubmitBtn"
@@ -198,44 +222,47 @@ export default function AssignmentDetail() {
               </button>
             </div>
           ) : (
-            /* ✅ ONLY THIS BLOCK CHANGED */
             <CompletedAssignment
               assignment={{
                 title: assignment.title,
-                subject: assignment.subject,
-                chapter: assignment.chapter,
-                teacher: assignment.teacher,
-                className: assignment.class_name,
+
+                // ✅ FIXED MAPPING
+                subject: assignment.subject_name || "",
+                chapter: assignment.chapter_name || "",
+                teacher: assignment.teacher_name || "",
 
                 description: assignment.description,
 
-                assignedOn: new Date(
-                  assignment.created_at || assignment.due_date
-                ).toLocaleDateString(),
+                // ✅ FIXED DATE
+                assignedOn: assignment.assigned_on
+                  ? new Date(assignment.assigned_on).toLocaleDateString("en-GB")
+                  : "",
 
-                dueDate: new Date(assignment.due_date).toLocaleDateString(),
+                dueDate: assignment.due_date
+                  ? new Date(assignment.due_date).toLocaleDateString("en-GB")
+                  : "",
 
-                teacherFile: {
-                  name: assignment.attachment?.split("/").pop(),
-                  size: "—",
-                  url: assignment.attachment,
-                },
+                teacherFile: assignment.attachment
+                  ? {
+                      name: assignment.attachment.split("/").pop(),
+                      size: "—",
+                      url: assignment.attachment,
+                    }
+                  : null,
 
                 submittedOn: formatSmallDate(submittedAt),
 
-                submissionStatus: "On time",
+                submissionStatus: assignment.submission_status_label || "",
 
-                submittedFile: {
-                  name:
-                    assignment?.submitted_file?.split("/").pop() ||
-                    "Submitted File",
-                  size: "—",
-                  type: "Document",
-                  url:
-                    assignment?.submitted_file ||
-                    assignment?.file ||
-                    assignment?.submission_file,
-                },
+                // ✅ FIXED FILE (NO FALLBACKS)
+                submittedFile: assignment.submitted_file
+                  ? {
+                      name: assignment.submitted_file.split("/").pop(),
+                      size: "—",
+                      type: assignment.submitted_file.split(".").pop().toUpperCase(),
+                      url: assignment.submitted_file,
+                    }
+                  : null,
               }}
             />
           )}

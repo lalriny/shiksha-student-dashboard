@@ -293,13 +293,7 @@ console.log("DURATION:", durationRef.current);
             ))}
           </div>
 
-          {/* Score */}
-          <div className="quiz-score-box">
-            <div className="quiz-score-label">Score:</div>
-            <div className="quiz-score-value">
-              {Object.keys(answers).length}/{qLen}
-            </div>
-          </div>
+          
 
           {/* Submit */}
           <button

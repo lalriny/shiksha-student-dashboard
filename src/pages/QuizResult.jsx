@@ -8,10 +8,11 @@ export default function QuizResult() {
   const navigate = useNavigate();
   const { subjectId, quizId } = useParams();
 
-  const [resultData, setResultData] = useState(null);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState(null);
+  const [resultData, setResultData]       = useState(null);
+  const [loading, setLoading]             = useState(true);
+  const [error, setError]                 = useState(null);
   const [openExplanation, setOpenExplanation] = useState({});
+  const [showReattemptModal, setShowReattemptModal] = useState(false); // NEW
 
   const toggleExplanation = (id) => {
     setOpenExplanation(prev => ({ ...prev, [id]: !prev[id] }));
@@ -59,10 +60,37 @@ export default function QuizResult() {
         &lt; Back
       </button>
 
-      {/* ── Header ── */}
-      <div className="quizResultHeaderBox">
-        <PageHeader title={resultData.subject_name} />
+      {/* ── Header with action buttons alongside search ── */}
+     <div className="quizResultHeaderBox">
+  <div className="quizResultHeaderInner">
+    <PageHeader title={resultData.subject_name} />
+
+    <div className="quizResultHeaderRow">
+      {/* SEARCH */}
+      <div className="quizSearch">
+        <input type="text" placeholder="Search questions..." />
+        <span className="quizSearchIcon">🔍</span>
       </div>
+
+      {/* BUTTONS BELOW SEARCH */}
+      <div className="quizResultHeaderBtns">
+        <button
+          className="quizResultBackBtn"
+          onClick={() => navigate(`/subjects/quiz/${subjectId}`)}
+        >
+          ← Back to Quizzes
+        </button>
+
+        <button
+          className="quizResultReattemptBtn"
+          onClick={() => setShowReattemptModal(true)}
+        >
+          🔁 Reattempt Quiz
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
       <div className="quizResultBodyBox">
 
@@ -101,7 +129,6 @@ export default function QuizResult() {
                 q.is_correct ? "quizDetailQuestion--correct" : "quizDetailQuestion--wrong"
               }`}
             >
-              {/* Question row */}
               <div className="quizDetailQuestionRow">
                 <p className="quizDetailQuestionText">
                   <span className={`quizResultBadge ${q.is_correct ? "quizResultBadge--correct" : "quizResultBadge--wrong"}`}>
@@ -114,12 +141,10 @@ export default function QuizResult() {
                 </span>
               </div>
 
-              {/* Your answer pill */}
               <div className={`quizResultAnswerPill ${q.is_correct ? "quizResultAnswerPill--correct" : "quizResultAnswerPill--wrong"}`}>
                 {q.is_correct ? "✓" : "✗"} Your Answer: {q.selected_choice}
               </div>
 
-              {/* Explanation toggle */}
               <div>
                 <button
                   onClick={() => toggleExplanation(q.id)}
@@ -139,28 +164,36 @@ export default function QuizResult() {
           ))}
         </div>
 
-        {/* ── Score + actions row ── */}
+        {/* ── Score row (no buttons here anymore) ── */}
         <div className="quizResultFooter">
           <p className="quizDetailScoreText">
             Score: {resultData.score} / {resultData.total_marks}
           </p>
-          <div className="quizResultFooterBtns">
-            <button
-              className="quizResultBackBtn"
-              onClick={() => navigate(`/subjects/quiz/${subjectId}`)}
-            >
-              ← Back to Quizzes
-            </button>
-            <button
-              className="quizResultReattemptBtn"
-              onClick={handleReattempt}
-            >
-              🔁 Reattempt Quiz
-            </button>
-          </div>
         </div>
 
       </div>
+
+      {/* ── Reattempt Confirmation Modal ── */}
+{showReattemptModal && (
+  <div className="quizModalOverlay">
+    <div className="quizModalBox">
+      <h3>Reattempt Quiz?</h3>
+      <p>
+        You are currently attempting this quiz.
+        <br /><br />
+        ⚠️ Your progress will be lost if you exit.
+      </p>
+      <div className="quizModalActions">
+        <button className="quiz-btn-cancel" onClick={() => setShowReattemptModal(false)}>
+          Cancel
+        </button>
+        <button className="quiz-btn-exit" onClick={handleReattempt}>
+          Yes, Reattempt
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

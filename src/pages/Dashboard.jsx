@@ -10,7 +10,7 @@ import "../styles/dashboard.css";
 
 export default function Dashboard() {
   const { activeCourse } = useCourse();
-
+  const [selectedDate, setSelectedDate] = useState(null);
   const [showAllSessions, setShowAllSessions] = useState(false);
   const [showAssignments, setShowAssignments] = useState(true);
   const [showQuizzes, setShowQuizzes] = useState(true);
@@ -108,6 +108,15 @@ export default function Dashboard() {
       ? schedule
       : schedule.filter((s) => s.type === scheduleFilter);
 
+  const assignmentDates = new Set(
+    assignments
+      .filter((a) => a.due)
+      .map((a) => {
+        const d = new Date(a.due);
+        return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      })
+  );
+
   const renderMobileSection = () => {
     switch (activeMobileTab) {
       case "sessions":
@@ -178,15 +187,31 @@ export default function Dashboard() {
                   currMonth === today.getMonth() &&
                   currYear === today.getFullYear();
 
+                const isSelected =
+                  selectedDate &&
+                  selectedDate.day === day &&
+                  selectedDate.month === currMonth &&
+                  selectedDate.year === currYear;
+
+                const dateKey = `${currYear}-${currMonth}-${day}`;
+                const hasAssignment = assignmentDates.has(dateKey);
+
                 return (
                   <div
                     key={day}
-                    className={`calDate ${isToday ? "calRed" : ""}`}
+                    className={`calDate ${isToday ? "calToday" : ""} ${isSelected ? "calSelected" : ""}`}
+                    onClick={() => setSelectedDate({ day, month: currMonth, year: currYear })}
                   >
                     {day}
+                    {hasAssignment && !isSelected && !isToday && (
+                      <div className="calDate__dots">
+                        <span className="calDate__dot calDate__dot--assignments" />
+                      </div>
+                    )}
                   </div>
                 );
               })}
+
             </div>
           </div>
         );
@@ -248,8 +273,23 @@ export default function Dashboard() {
 
             <div className="mobileSectionContent">
               {filteredSchedule.map((item, idx) => (
-                <div key={idx} className="scheduleItem">
-                  <p className="scheduleDate">{item.date}</p>
+                <div key={idx} className={`scheduleItem scheduleItem--${
+                item.type === "Live Sessions" ? "livesessions"
+                : item.type === "Assignments" ? "assignments"
+                : item.type === "Quiz" ? "quiz"
+                : ""
+            }`}>
+
+                  <div className="scheduleItem__header">
+                    <p className="scheduleDate">{item.date}</p>
+                    {item.type && (
+                      <span className={`scheduleBadge scheduleBadge--${
+                        item.type === "Live Sessions" ? "livesessions"
+                        : item.type === "Assignments" ? "assignments"
+                        : item.type === "Quiz" ? "quiz" : ""
+                      }`}>{item.type}</span>
+                    )}
+                  </div>
                   <p className="scheduleTitle">{item.title}</p>
                   <p className="scheduleSub">{item.subject}</p>
                   <p className="scheduleSub">{item.teacher}</p>
@@ -310,6 +350,9 @@ export default function Dashboard() {
               {(showAllSessions ? sessions : collapsedSessions).map((s, idx) => (
                 <SessionCard key={idx} {...s} />
               ))}
+              {(showAllSessions ? sessions : collapsedSessions).length === 0 && (
+                <div className="emptyState">No upcoming live sessions for today</div>
+              )}
             </div>
           </div>
 
@@ -368,15 +411,31 @@ export default function Dashboard() {
                   currMonth === today.getMonth() &&
                   currYear === today.getFullYear();
 
+                const isSelected =
+                  selectedDate &&
+                  selectedDate.day === day &&
+                  selectedDate.month === currMonth &&
+                  selectedDate.year === currYear;
+
+                const dateKey = `${currYear}-${currMonth}-${day}`;
+                const hasAssignment = assignmentDates.has(dateKey);
+
                 return (
                   <div
                     key={day}
-                    className={`calDate ${isToday ? "calRed" : ""}`}
+                    className={`calDate ${isToday ? "calToday" : ""} ${isSelected ? "calSelected" : ""}`}
+                    onClick={() => setSelectedDate({ day, month: currMonth, year: currYear })}
                   >
                     {day}
+                    {hasAssignment && !isSelected && !isToday && (
+                      <div className="calDate__dots">
+                        <span className="calDate__dot calDate__dot--assignments" />
+                      </div>
+                    )}
                   </div>
                 );
               })}
+
             </div>
           </div>
         </div>
@@ -420,43 +479,7 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
-
-              <div className="whiteCard">
-                <div
-                  className="cardHeader cardHeader--clickable"
-                  onClick={() => setShowQuizzes(!showQuizzes)}
-                >
-                  <h3>Quiz</h3>
-
-                  <button className="arrowBtn">
-                    <span
-                      className={`arrowBtn__chevron ${
-                        showQuizzes ? "arrowBtn__chevron--up" : ""
-                      }`}
-                    >
-                      <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-                        <path
-                          d="M1 1.5L6 6.5L11 1.5"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
-                  </button>
-                </div>
-
-                {showQuizzes && (
-                  <div className="listBody">
-                    {quizzes.map((q, idx) => (
-                      <AssignmentCard key={idx} {...q} />
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
-
             {/* Notifications */}
             <div className="whiteCard">
               <div className="cardHeader">
@@ -486,12 +509,29 @@ export default function Dashboard() {
 
               <div className="scheduleList">
                 {filteredSchedule.map((item, idx) => (
-                  <div key={idx} className="scheduleItem">
-                    <p className="scheduleDate">{item.date}</p>
-                    <p className="scheduleTitle">{item.title}</p>
+                  <div key={idx} className={`scheduleItem scheduleItem--${
+                    item.type === "Live Sessions" ? "livesessions"
+                    : item.type === "Assignments" ? "assignments"
+                    : item.type === "Quiz" ? "quiz"
+                    : ""
+                    }`}>
+
+                    <div className="scheduleItem__header">
+                      <p className="scheduleDate">{item.date}</p>
+                        {item.type && (
+                          <span className={`scheduleBadge scheduleBadge--${
+                            item.type === "Live Sessions" ? "livesessions"
+                            : item.type === "Assignments" ? "assignments"
+                            : item.type === "Quiz" ? "quiz" : ""
+                          }`}>{item.type}</span>
+                        )}
+                      </div>
+                      <p className="scheduleTitle">{item.title}</p>
+                  <div>
                     <p className="scheduleSub">{item.subject}</p>
                     <p className="scheduleSub">{item.teacher}</p>
                     <p className="scheduleSub">{item.time}</p>
+                  </div>
                   </div>
                 ))}
               </div>

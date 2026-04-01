@@ -995,3 +995,96 @@
 .quizResultReattemptBtn:hover {
   background: #097a83;
 }
+/* ── Reattempt modal overrides ── */
+.reattemptModal {
+  background: #1a2332;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 28px 28px 24px;
+  width: 360px;
+  text-align: center;
+  animation: reattemptSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes reattemptSlideIn {
+  from { opacity: 0; transform: translateY(-28px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)     scale(1);    }
+}
+
+/* Icon */
+.reattemptModal__icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+  animation: reattemptIconPop 0.35s 0.1s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes reattemptIconPop {
+  from { transform: scale(0.4) rotate(-20deg); opacity: 0; }
+  to   { transform: scale(1)   rotate(0deg);   opacity: 1; }
+}
+
+/* Title */
+.reattemptModal__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 10px;
+}
+
+/* Body */
+.reattemptModal__body {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #aab4c4;
+  margin: 0;
+}
+
+.reattemptModal__warn {
+  color: #ef4444;
+}
+
+/* Divider */
+.reattemptModal__divider {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 20px 0 16px;
+}
+
+/* Buttons row */
+.reattemptModal .quizModalActions {
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Cancel */
+.reattemptModal__cancel {
+  padding: 8px 22px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  color: #aab4c4 !important;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.1s ease;
+}
+.reattemptModal__cancel:hover  { background: rgba(255,255,255,0.07); color: #fff !important; }
+.reattemptModal__cancel:active { transform: scale(0.97); }
+
+/* Confirm */
+.reattemptModal__confirm {
+  padding: 8px 22px;
+  border-radius: 8px;
+  background: #0a808a;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.1s ease;
+}
+.reattemptModal__confirm:hover {
+  background: #0d9aa5;
+  box-shadow: 0 4px 14px rgba(10, 128, 138, 0.45);
+}
+.reattemptModal__confirm:active { transform: scale(0.97); }
