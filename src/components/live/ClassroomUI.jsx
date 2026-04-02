@@ -17,10 +17,9 @@ export default function ClassroomUI({ role }) {
     { source: Track.Source.ScreenShare, withPlaceholder: false },
   ]);
 
-  // Separate teacher's camera and screen share tracks
-  const teacherTracks = tracks.filter((t) => t.participant.permissions?.canPublish);
-  const screenTrack = teacherTracks.find((t) => t.source === Track.Source.ScreenShare);
-  const cameraTrack = teacherTracks.find((t) => t.source === Track.Source.Camera);
+  // Students can't publish — all video tracks in the room are the teacher's
+  const screenTrack = tracks.find((t) => t.source === Track.Source.ScreenShare);
+  const cameraTrack = tracks.find((t) => t.source === Track.Source.Camera);
 
   // Prioritize screen share as main view; fall back to camera
   const mainTrack = screenTrack || cameraTrack;
@@ -103,8 +102,8 @@ export default function ClassroomUI({ role }) {
       )}
 
 
-      <ControlBar role={role} />
-      {role === "STUDENT" && <RaiseHandButton />}
+      <ControlBar />
+      <RaiseHandButton />
     </div>
   );
 }
