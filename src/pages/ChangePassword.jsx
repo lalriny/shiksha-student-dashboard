@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import "../styles/changePassword.css";
 import api from "../api/apiClient";
 
@@ -19,6 +20,11 @@ export default function ChangePassword() {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [showPassword, setShowPassword] = useState({
+    oldPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
   const handleChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -98,22 +104,40 @@ export default function ChangePassword() {
           )}
           <div className="changePassword__field">
             <label className="changePassword__label">Old Password</label>
-            <input
-              type="password"
-              className="changePassword__input"
-              value={formData.oldPassword}
-              onChange={(e) => handleChange("oldPassword", e.target.value)}
-            />
+            <div className="changePassword__inputWrapper">
+              <input
+                type={showPassword.oldPassword ? "text" : "password"}
+                className="changePassword__input"
+                value={formData.oldPassword}
+                onChange={(e) => handleChange("oldPassword", e.target.value)}
+              />
+              <button
+                type="button"
+                className="changePassword__eyeBtn"
+                onClick={() => setShowPassword((prev) => ({ ...prev, oldPassword: !prev.oldPassword }))}
+              >
+                {showPassword.oldPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
           </div>
 
           <div className="changePassword__field">
             <label className="changePassword__label">New Password</label>
-            <input
-              type="password"
-              className="changePassword__input"
-              value={formData.newPassword}
-              onChange={(e) => handleChange("newPassword", e.target.value)}
-            />
+            <div className="changePassword__inputWrapper">
+              <input
+                type={showPassword.newPassword ? "text" : "password"}
+                className="changePassword__input"
+                value={formData.newPassword}
+                onChange={(e) => handleChange("newPassword", e.target.value)}
+              />
+              <button
+                type="button"
+                className="changePassword__eyeBtn"
+                onClick={() => setShowPassword((prev) => ({ ...prev, newPassword: !prev.newPassword }))}
+              >
+                {showPassword.newPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
             <ul className="changePassword__requirements">
               <li className={validation.minLength ? "valid" : ""}>
                 Must be at least 8 character
@@ -135,12 +159,21 @@ export default function ChangePassword() {
 
           <div className="changePassword__field">
             <label className="changePassword__label">Confirm Password</label>
-            <input
-              type="password"
-              className="changePassword__input"
-              value={formData.confirmPassword}
-              onChange={(e) => handleChange("confirmPassword", e.target.value)}
-            />
+            <div className="changePassword__inputWrapper">
+              <input
+                type={showPassword.confirmPassword ? "text" : "password"}
+                className="changePassword__input"
+                value={formData.confirmPassword}
+                onChange={(e) => handleChange("confirmPassword", e.target.value)}
+              />
+              <button
+                type="button"
+                className="changePassword__eyeBtn"
+                onClick={() => setShowPassword((prev) => ({ ...prev, confirmPassword: !prev.confirmPassword }))}
+              >
+                {showPassword.confirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="changePassword__btn" disabled={loading}>
