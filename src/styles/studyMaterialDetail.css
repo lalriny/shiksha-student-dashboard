@@ -1,118 +1,143 @@
+/* PAGE */
 .smd-page {
-  padding: 20px;
+  padding: 24px 28px;
   background: #c8d0d3;
   min-height: 100vh;
 }
 
-/* BACK */
+/* BACK BUTTON */
 .smd-back {
-  background: #4ba7b5;
+  background: #2e7d8a;
   color: white;
   border: none;
-  padding: 6px 14px;
-  border-radius: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
 }
 
 /* HEADER */
 .smd-header {
   background: #eceff0;
-  padding: 14px 20px;
+  padding: 14px 22px;
   border-radius: 12px;
-  margin-top: 10px;
+  margin-top: 12px;
+}
+
+.smd-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 /* MAIN WRAPPER */
 .smd-wrapper {
   display: flex;
-  gap: 40px;
-  margin-top: 20px;
-  background: #dcdcdc;
-  padding: 30px;
-  border-radius: 18px;
+  gap: 32px;
+  margin-top: 16px;
+  background: #ffffff;
+  padding: 32px 28px;
+  border-radius: 16px;
+  align-items: flex-start;
 }
 
 /* LEFT */
 .smd-left {
   flex: 1;
+  min-width: 0;
 }
 
 .smd-topic {
   font-size: 22px;
   font-weight: 700;
-  margin-bottom: 6px;
+  margin: 0 0 6px 0;
+  color: #111;
 }
 
 .smd-chapter {
-  color: #444;
+  color: #555;
   font-size: 14px;
-  margin-bottom: 20px;
+  margin: 0 0 24px 0;
 }
 
 /* NOTE */
 .smd-note-label {
   font-weight: 600;
-  margin-bottom: 6px;
+  font-size: 15px;
+  margin: 0 0 8px 0;
+  color: #222;
 }
 
 .smd-note-box {
-  background: #f3f3f3;
-  border: 1px solid #aaa;
-  border-radius: 6px;
-  padding: 12px;
-  max-width: 420px;
-  font-size: 13px;
+  background: #f8f8f8;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 13.5px;
+  color: #333;
+  line-height: 1.55;
+  max-width: 460px;
 }
 
-/* RIGHT PANEL */
+/* RIGHT PANEL — fixed height for exactly 4 file rows */
 .smd-files-panel {
-  width: 330px;
-  background: #2e5b63;
+  width: 340px;
+  flex-shrink: 0;
+  background: #1e5f6c;
   border-radius: 14px;
-  padding: 20px;
+  padding: 18px 16px;
   color: white;
-  position: relative;
+  /* header ~42px + 4 cards (56px each) + 3 gaps (10px each) + 16px bottom padding */
+  height: 310px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* HEADER */
+/* FILES HEADER */
 .smd-files-header {
   text-align: center;
   font-weight: 600;
+  font-size: 15px;
   margin-bottom: 14px;
+  flex-shrink: 0;
 }
 
-/* FLOAT BADGE */
-.smd-file-count {
-  position: absolute;
-  top: 10px;
-  right: -10px;
-  background: #4caf50;
-  color: white;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* FILE LIST */
+/* FILE LIST — scrollable if more than 4 */
 .smd-files-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  overflow-y: auto;
+  flex: 1;
+  /* hide scrollbar visually but keep functionality */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.smd-files-list::-webkit-scrollbar {
+  width: 4px;
+}
+.smd-files-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.smd-files-list::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.25);
+  border-radius: 4px;
 }
 
 /* FILE CARD */
 .smd-file-card {
-  border: 1px dashed rgba(255,255,255,0.5);
-  padding: 12px;
+  border: 1.5px dashed rgba(255,255,255,0.45);
+  padding: 10px 12px;
   border-radius: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
+  min-height: 56px;
 }
 
 /* FILE INFO */
@@ -120,28 +145,76 @@
   display: flex;
   gap: 10px;
   align-items: center;
+  min-width: 0;
+  flex: 1;
 }
 
 .smd-file-icon {
-  font-size: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 6px;
+}
+
+.smd-file-text {
+  min-width: 0;
 }
 
 .smd-file-name {
   font-size: 13px;
-  margin: 0;
+  font-weight: 500;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
 }
 
 .smd-file-size {
   font-size: 11px;
-  opacity: 0.7;
+  opacity: 0.65;
 }
 
 /* ACTIONS */
-.smd-file-actions button {
+.smd-file-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.smd-view-btn {
   background: transparent;
   border: none;
   color: white;
   cursor: pointer;
-  margin-left: 10px;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0;
+  opacity: 0.9;
+}
+
+.smd-view-btn:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.smd-download-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+}
+
+.smd-download-btn:hover {
+  opacity: 1;
 }

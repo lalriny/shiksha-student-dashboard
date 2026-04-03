@@ -56,17 +56,22 @@ export default function StudyMaterialDetail() {
             Files - {material.files?.length || 0}
           </div>
 
-          <div className="smd-file-count">
-            {material.files?.length || 0}
-          </div>
-
           <div className="smd-files-list">
 
             {material.files?.map((file) => (
               <div key={file.id} className="smd-file-card">
 
                 <div className="smd-file-info">
-                  <div className="smd-file-icon">📄</div>
+                  <div className="smd-file-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="3" y="2" width="13" height="18" rx="2" fill="#4ba7b5" opacity="0.25"/>
+                      <path d="M6 2h8l4 4v14a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z" stroke="white" strokeWidth="1.5" fill="none"/>
+                      <path d="M14 2v4h4" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/>
+                      <line x1="8" y1="10" x2="16" y2="10" stroke="white" strokeWidth="1.2"/>
+                      <line x1="8" y1="13" x2="16" y2="13" stroke="white" strokeWidth="1.2"/>
+                      <line x1="8" y1="16" x2="12" y2="16" stroke="white" strokeWidth="1.2"/>
+                    </svg>
+                  </div>
 
                   <div className="smd-file-text">
                     <p className="smd-file-name">{file.file_name}</p>
@@ -75,8 +80,14 @@ export default function StudyMaterialDetail() {
                 </div>
 
                 <div className="smd-file-actions">
-                  <button onClick={() => window.open(file.file_url)}>
-                    ⬇
+                  <button className="smd-view-btn" onClick={() => window.open(file.file_url)}>
+                    View
+                  </button>
+                  <button className="smd-download-btn" onClick={() => window.open(file.file_url)}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 3v13M7 12l5 5 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M5 20h14" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
                   </button>
                 </div>
 
