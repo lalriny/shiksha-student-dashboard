@@ -20,16 +20,17 @@ export default function StudyMaterialList() {
       .then((res) => {
 
         const materials = res.data.map((item) => {
-          const firstFile = item.files?.[0];
 
           return {
             id: item.id,
-            name: item.title,
-            date: new Date(item.created_at).toLocaleDateString(),
 
-            // ✅ correct field from backend
-            fileUrl: firstFile?.file_url || null
+            // ✅ FIXED MAPPING
+            chapter: item.chapter_title || "No chapter",
+            topic: item.title,
+            date: new Date(item.created_at).toLocaleDateString(),
+            filesCount: item.files?.length || 0
           };
+
         });
 
         setChaptersData(materials);
@@ -41,18 +42,12 @@ export default function StudyMaterialList() {
 
   }, [subjectId]);
 
-  const handleView = (chapter) => {
-    navigate(`/study-material/view/${chapter.id}`);
+  const handleView = (item) => {
+    navigate(`/study-material/view/${item.id}`);
   };
 
-  const handleDownload = (chapter) => {
-    if (!chapter.fileUrl) return;
-
-    window.open(chapter.fileUrl, "_blank");
-  };
-
-  const filteredChapters = chaptersData.filter((chapter) =>
-    chapter.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredChapters = chaptersData.filter((item) =>
+    item.topic.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -78,32 +73,29 @@ export default function StudyMaterialList() {
 
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Date</th>
+                  <th>Chapter</th>       {/* ✅ */}
+                  <th>Topic</th>         {/* ✅ */}
+                  <th>Upload Date</th>   {/* ✅ */}
+                  <th>Files</th>         {/* ✅ */}
                   <th></th>
                 </tr>
               </thead>
 
               <tbody>
-                {filteredChapters.map((chapter) => (
-                  <tr key={chapter.id}>
-                    <td>{chapter.name}</td>
-                    <td>{chapter.date}</td>
+                {filteredChapters.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.chapter}</td>
+                    <td>{item.topic}</td>
+                    <td>{item.date}</td>
+                    <td>{item.filesCount}</td>
 
                     <td className="studyMaterialActions">
 
                       <button
                         className="studyMaterialViewBtn"
-                        onClick={() => handleView(chapter)}
+                        onClick={() => handleView(item)}
                       >
                         View
-                      </button>
-
-                      <button
-                        className="studyMaterialDownloadBtn"
-                        onClick={() => handleDownload(chapter)}
-                      >
-                        Download
                       </button>
 
                     </td>
@@ -118,19 +110,19 @@ export default function StudyMaterialList() {
           <div className="studyMaterialMobile">
 
             <div className="studyMaterialMobileHeader">
-              <span>Title</span>
-              <span>Uploaded On</span>
+              <span>Topic</span>
+              <span>Date</span>
             </div>
 
-            {filteredChapters.map((chapter) => (
-              <div key={chapter.id} className="studyMaterialCard">
+            {filteredChapters.map((item) => (
+              <div key={item.id} className="studyMaterialCard">
 
                 <div className="studyMaterialCardTop">
                   <p className="studyMaterialCardTitle">
-                    {chapter.name}
+                    {item.topic}
                   </p>
                   <p className="studyMaterialCardDate">
-                    {chapter.date}
+                    {item.date}
                   </p>
                 </div>
 
@@ -138,16 +130,9 @@ export default function StudyMaterialList() {
 
                   <button
                     className="viewBtn"
-                    onClick={() => handleView(chapter)}
+                    onClick={() => handleView(item)}
                   >
                     View
-                  </button>
-
-                  <button
-                    className="downloadBtn"
-                    onClick={() => handleDownload(chapter)}
-                  >
-                    Download
                   </button>
 
                 </div>
