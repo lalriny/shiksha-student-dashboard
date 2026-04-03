@@ -1,25 +1,13 @@
 /**
  * FILE: STUDENT_DASHBOARD/src/components/live/PrivateClassroomUI.jsx
  *
- * Full-featured private session room UI.
- * Uses @livekit/components-react for real LiveKit connection.
- *
- * Features:
- *   - Auto-adjusting video grid (1–4+ participants)
- *   - Screen share layout (main + strip)
- *   - Pin/unpin participants (max 4)
- *   - Speaking detection (green border)
- *   - Raise hand with visual indicator on tiles
- *   - Muted indicator overlay on tiles
- *   - Toast notifications
- *   - Chat panel (reuses existing ChatPanel)
- *   - Participant list with role badges
- *   - Timer + participant count
- *   - Responsive
+ * Private session room UI — matches Teacher UI visually.
+ * Student-only controls: mic, cam, screen share, raise hand, chat, leave.
+ * No teacher power controls (record, mute all, mute individual, remove, end for all).
  *
  * Props:
  *   role    — "student" | "teacher"
- *   session — { subject, topic, ... } from transformSession()
+ *   session — { subject, topic, ... }
  */
 
 import {
@@ -58,27 +46,16 @@ function useToast() {
   return { toasts, show };
 }
 
-/* ═══════════════════════════════════════════════════════════
-   SPEAKING HOOK — manual implementation since useIsSpeaking
-   is not available in @livekit/components-react 2.9.20
-═══════════════════════════════════════════════════════════ */
-
 function useSpeakingDetect(participant) {
   const [isSpeaking, setIsSpeaking] = useState(false);
-
   useEffect(() => {
     if (!participant) return;
     const onSpeaking = (speaking) => setIsSpeaking(speaking);
     participant.on("isSpeakingChanged", onSpeaking);
     return () => participant.off("isSpeakingChanged", onSpeaking);
   }, [participant]);
-
   return isSpeaking;
 }
-
-/* ═══════════════════════════════════════════════════════════
-   SPEAKING WRAPPER
-═══════════════════════════════════════════════════════════ */
 
 function SpeakingTile({ track, children }) {
   const isSpeaking = useSpeakingDetect(track.participant);
@@ -86,17 +63,10 @@ function SpeakingTile({ track, children }) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   VIDEO TILE
+   VIDEO TILE — identical to Teacher UI
 ═══════════════════════════════════════════════════════════ */
 
-function Tile({
-  track,
-  localId,
-  pinned,
-  onPin,
-  raisedHands,
-  large,
-}) {
+function Tile({ track, localId, pinned, onPin, raisedHands, large, isScreenShare }) {
   const p = track.participant;
   const name = p.name || p.identity || "?";
   const isLocal = p.identity === localId;
@@ -107,35 +77,44 @@ function Tile({
   const isCamOff = !p.isCameraEnabled;
   const hasHand = raisedHands[p.identity];
 
+  // Screen share tiles always show the video track
+  if (isScreenShare) {
+    return (
+      <div className={`pvt-tile pvt-tile-screenshare ${pinned ? "pvt-tile-pinned" : ""}`}>
+        <VideoTrack trackRef={track} />
+        <div className="pvt-tile-label">
+          🖥️ {isLocal ? `${name} (You)` : name}'s Screen
+        </div>
+        <button
+          className={`pvt-pin-btn ${pinned ? "pvt-pin-active" : ""}`}
+          onClick={(e) => { e.stopPropagation(); onPin(p.identity); }}
+          title={pinned ? "Unpin" : "Pin"}
+        >
+          {pinned ? "📌" : "📍"}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <SpeakingTile track={track}>
       {(isSpeaking) => (
         <div className={`pvt-tile ${isSpeaking ? "pvt-tile-speaking" : ""} ${pinned ? "pvt-tile-pinned" : ""}`}>
-          {/* Video or placeholder */}
           {!isCamOff && (track.publication?.isSubscribed || isLocal) ? (
             <VideoTrack trackRef={track} />
           ) : (
             <ParticipantPlaceholder name={name} large={large} />
           )}
 
-          {/* Muted bar */}
-          {isMuted && (
-            <div className="pvt-muted-bar">🔇 Muted</div>
-          )}
+          {isMuted && <div className="pvt-muted-bar">🔇 Muted</div>}
+          {hasHand && <div className="pvt-hand-indicator">🖐</div>}
 
-          {/* Raised hand */}
-          {hasHand && (
-            <div className="pvt-hand-indicator">🖐</div>
-          )}
-
-          {/* Name label */}
           <div className="pvt-tile-label">
             {isTeacher && <span className="pvt-host-badge">HOST</span>}
             {isLocal ? `${name} (You)` : name}
             {isSpeaking && <span className="pvt-speaking-dot">●</span>}
           </div>
 
-          {/* Pin button */}
           <button
             className={`pvt-pin-btn ${pinned ? "pvt-pin-active" : ""}`}
             onClick={(e) => { e.stopPropagation(); onPin(p.identity); }}
@@ -167,7 +146,7 @@ function ParticipantPlaceholder({ name, large }) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   PARTICIPANTS LIST (sidebar)
+   PARTICIPANTS LIST (sidebar) — no mute/remove controls
 ═══════════════════════════════════════════════════════════ */
 
 function ParticipantsList({ participants, localId, raisedHands }) {
@@ -224,7 +203,6 @@ export default function PrivateClassroomUI({ role, session }) {
   const [handRaised, setHandRaised] = useState(false);
   const [raisedHands, setRaisedHands] = useState({});
   const [pinnedIds, setPinnedIds] = useState(new Set());
-  const isTeacher = role === "teacher";
 
   // Get all tracks
   const tracks = useTracks([
@@ -244,28 +222,22 @@ export default function PrivateClassroomUI({ role, session }) {
         const msg = JSON.parse(decoder.decode(payload));
         const id = participant?.identity || msg.sender;
 
-        // ── Raise / Lower hand ──
         if (msg.type === "RAISE_HAND" && id) {
           setRaisedHands((prev) => ({ ...prev, [id]: true }));
-          const name = participant?.name || id;
-          show(`${name} raised their hand 🖐`, "info");
+          show(`${participant?.name || id} raised their hand 🖐`, "info");
         }
         if (msg.type === "LOWER_HAND" && id) {
-          setRaisedHands((prev) => {
-            const updated = { ...prev };
-            delete updated[id];
-            return updated;
-          });
+          setRaisedHands((prev) => { const u = { ...prev }; delete u[id]; return u; });
         }
 
-        // ── Teacher force-muted you ──
+        // Teacher force-muted you
         if (msg.type === "FORCE_MUTE" && msg.target === localParticipant.identity) {
           localParticipant.setMicrophoneEnabled(false);
           setMicOn(false);
           show("You were muted by the teacher", "warn");
         }
 
-        // ── Teacher removed you from session ──
+        // Teacher removed you from session
         if (msg.type === "FORCE_DISCONNECT" && msg.target === localParticipant.identity) {
           show("You were removed from the session", "warn");
           setTimeout(() => room.disconnect(), 1000);
@@ -313,8 +285,8 @@ export default function PrivateClassroomUI({ role, session }) {
   };
 
   const leaveRoom = async () => {
-    if (window.confirm(isTeacher ? "End session for all?" : "Leave session?")) {
-      show(isTeacher ? "Session ended" : "You left", "info");
+    if (window.confirm("Leave session?")) {
+      show("You left", "info");
       setTimeout(async () => {
         await room.disconnect();
       }, 600);
@@ -326,30 +298,35 @@ export default function PrivateClassroomUI({ role, session }) {
   const togglePin = (identity) => {
     setPinnedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(identity)) {
-        next.delete(identity);
-      } else if (next.size < 4) {
-        next.add(identity);
-      }
+      if (next.has(identity)) next.delete(identity);
+      else if (next.size < 4) next.add(identity);
       return next;
     });
   };
 
-  // ── Grid layout ──
+  // ── Grid layout — Google Meet style ──
+  const allTracks = [...screenTracks, ...cameraTracks];
+  const totalTiles = allTracks.length;
 
-  const camCount = cameraTracks.length;
   const gridClass =
-    camCount <= 1 ? "pvt-grid-1" :
-    camCount === 2 ? "pvt-grid-2" :
-    camCount === 3 ? "pvt-grid-3" :
-    camCount === 4 ? "pvt-grid-4" : "pvt-grid-many";
+    totalTiles <= 1 ? "pvt-grid-1" :
+    totalTiles === 2 ? "pvt-grid-2" :
+    totalTiles <= 4 ? "pvt-grid-4" :
+    totalTiles <= 6 ? "pvt-grid-6" :
+    totalTiles <= 9 ? "pvt-grid-9" : "pvt-grid-many";
 
-  // Sort: pinned first
-  const sortedCameraTracks = [...cameraTracks].sort((a, b) => {
+  const sortedAllTracks = [...allTracks].sort((a, b) => {
     const aPin = pinnedIds.has(a.participant.identity) ? 0 : 1;
     const bPin = pinnedIds.has(b.participant.identity) ? 0 : 1;
-    return aPin - bPin;
+    if (aPin !== bPin) return aPin - bPin;
+    const aScreen = a.source === Track.Source.ScreenShare ? 0 : 1;
+    const bScreen = b.source === Track.Source.ScreenShare ? 0 : 1;
+    return aScreen - bScreen;
   });
+
+  const pinnedTracks = sortedAllTracks.filter(t => pinnedIds.has(t.participant.identity));
+  const unpinnedTracks = sortedAllTracks.filter(t => !pinnedIds.has(t.participant.identity));
+  const showSpotlight = pinnedTracks.length === 1 && totalTiles > 1;
 
   return (
     <div className="pvt-room">
@@ -357,7 +334,7 @@ export default function PrivateClassroomUI({ role, session }) {
       <div className="pvt-topbar">
         <div className="pvt-topbar-left">
           <div className="pvt-session-name">{session?.subject || "Private Session"}</div>
-          <div className="pvt-session-sub">{session?.topic || "Private Session"}</div>
+          <div className="pvt-session-sub">{session?.topic || session?.subject || "Private Session"}</div>
         </div>
         <div className="pvt-topbar-right">
           <span className="pvt-timer">⏱ {timer}</span>
@@ -365,8 +342,8 @@ export default function PrivateClassroomUI({ role, session }) {
         </div>
       </div>
 
-      {/* ── Raised hand banner ── */}
-      {Object.keys(raisedHands).length > 0 && isTeacher && (
+      {/* ── Raised hand banner (visible to all) ── */}
+      {Object.keys(raisedHands).length > 0 && (
         <div className="pvt-hand-banner">
           🖐 {Object.keys(raisedHands).length} participant{Object.keys(raisedHands).length !== 1 ? "s" : ""} raised hand
         </div>
@@ -375,53 +352,64 @@ export default function PrivateClassroomUI({ role, session }) {
       {/* ── Main Area ── */}
       <div className="pvt-main">
         <div className="pvt-video-area">
-          {screenTracks.length > 0 ? (
+          {showSpotlight ? (
+            /* ── Spotlight layout: 1 pinned large + rest in strip ── */
             <div className="pvt-screen-layout">
               <div className="pvt-screen-main">
-                <VideoTrack trackRef={screenTracks[0]} />
+                {pinnedTracks[0].source === Track.Source.ScreenShare ? (
+                  <VideoTrack trackRef={pinnedTracks[0]} />
+                ) : (
+                  <Tile
+                    key={pinnedTracks[0].participant.identity + "-pin"}
+                    track={pinnedTracks[0]}
+                    localId={localParticipant.identity}
+                    pinned={true} onPin={togglePin}
+                    raisedHands={raisedHands} large={true}
+                    isScreenShare={false}
+                  />
+                )}
               </div>
               <div className="pvt-screen-strip">
-                {sortedCameraTracks.map((track) => (
+                {unpinnedTracks.map((track) => (
                   <Tile
-                    key={track.participant.identity}
+                    key={track.participant.identity + "-" + track.source}
                     track={track}
                     localId={localParticipant.identity}
-                    pinned={pinnedIds.has(track.participant.identity)}
-                    onPin={togglePin}
-                    raisedHands={raisedHands}
-                    large={false}
+                    pinned={false} onPin={togglePin}
+                    raisedHands={raisedHands} large={false}
+                    isScreenShare={track.source === Track.Source.ScreenShare}
                   />
                 ))}
               </div>
             </div>
           ) : (
+            /* ── Grid layout: all tiles in even Google Meet grid ── */
             <div className={`pvt-video-grid ${gridClass}`}>
-              {sortedCameraTracks.map((track) => (
+              {sortedAllTracks.map((track) => (
                 <Tile
-                  key={track.participant.identity}
+                  key={track.participant.identity + "-" + track.source}
                   track={track}
                   localId={localParticipant.identity}
                   pinned={pinnedIds.has(track.participant.identity)}
                   onPin={togglePin}
                   raisedHands={raisedHands}
-                  large={camCount <= 2}
+                  large={totalTiles <= 2}
+                  isScreenShare={track.source === Track.Source.ScreenShare}
                 />
               ))}
             </div>
           )}
 
-          {/* ── Control Bar ── */}
+          {/* ── Control Bar — Student controls only ── */}
           <div className="pvt-controls">
             <div className="pvt-ctrl-left">
-              {!isTeacher && (
-                <button
-                  className={`pvt-ctrl-btn ${handRaised ? "pvt-ctrl-active" : ""}`}
-                  onClick={toggleHand}
-                  title={handRaised ? "Lower Hand" : "Raise Hand"}
-                >
-                  🖐
-                </button>
-              )}
+              <button
+                className={`pvt-ctrl-btn ${handRaised ? "pvt-ctrl-active" : ""}`}
+                onClick={toggleHand}
+                title={handRaised ? "Lower Hand" : "Raise Hand"}
+              >
+                🖐
+              </button>
             </div>
             <div className="pvt-ctrl-center">
               <button className={`pvt-ctrl-btn ${micOn ? "" : "pvt-ctrl-off"}`} onClick={toggleMic} title={micOn ? "Mute" : "Unmute"}>
@@ -449,8 +437,8 @@ export default function PrivateClassroomUI({ role, session }) {
               </button>
             </div>
             <div className="pvt-ctrl-right">
-              <button className={`pvt-leave-btn ${isTeacher ? "pvt-end-btn" : ""}`} onClick={leaveRoom}>
-                {isTeacher ? "⛔ End for All" : "← Leave"}
+              <button className="pvt-leave-btn" onClick={leaveRoom}>
+                ← Leave
               </button>
             </div>
           </div>
