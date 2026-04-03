@@ -71,6 +71,7 @@
   border-spacing: 0 12px;
 }
 
+/* ── Sortable Headers ── */
 .studyMaterialTable th {
   padding: 10px 16px;
   text-align: left;
@@ -79,47 +80,67 @@
   color: #4a8c72;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.studyMaterialTable th:last-child {
+  cursor: default;
+}
+.studyMaterialTable th:hover:not(:last-child) {
+  color: #0a808a;
+}
+.studyMaterialTable th.sorted {
+  color: #0a808a;
 }
 
-/* ── Column Widths (FIXED) ── */
-.studyMaterialTable th:nth-child(1),
-.studyMaterialTable td:nth-child(1) {
-  width: 28%;
+.sortArrow {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 11px;
+  opacity: 0.4;
+  transition: opacity 0.2s;
 }
+.studyMaterialTable th.sorted .sortArrow {
+  opacity: 1;
+}
+
+/* ── Column Widths ── */
+.studyMaterialTable th:nth-child(1),
+.studyMaterialTable td:nth-child(1) { width: 28%; }
 
 .studyMaterialTable th:nth-child(2),
-.studyMaterialTable td:nth-child(2) {
-  width: 32%;
-}
+.studyMaterialTable td:nth-child(2) { width: 30%; }
 
 .studyMaterialTable th:nth-child(3),
-.studyMaterialTable td:nth-child(3) {
-  width: 18%;
-  white-space: nowrap;
-}
+.studyMaterialTable td:nth-child(3) { width: 16%; white-space: nowrap; }
 
 .studyMaterialTable th:nth-child(4),
-.studyMaterialTable td:nth-child(4) {
-  width: 8%;
-  text-align: center;
-}
+.studyMaterialTable td:nth-child(4) { width: 8%; text-align: center; }
 
 .studyMaterialTable th:nth-child(5),
-.studyMaterialTable td:nth-child(5) {
-  width: 14%;
-  text-align: right;
+.studyMaterialTable td:nth-child(5) { width: 18%; text-align: right; }
+
+/* ── Row Animation ── */
+@keyframes rowFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Rows ── */
-.studyMaterialTable tbody tr {
+.studyMaterialRow {
   background: white;
   border-radius: 10px;
-  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+  animation: rowFadeIn 0.35s ease both;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
 }
-
-.studyMaterialTable tbody tr:hover {
+.studyMaterialRow:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(10, 128, 138, 0.1);
+  box-shadow: 0 4px 12px rgba(10, 128, 138, 0.12);
+}
+.studyMaterialRow.highlighted {
+  background: #f0fbf8;
 }
 
 .studyMaterialTable td {
@@ -128,18 +149,47 @@
   color: #2d6b52;
   vertical-align: middle;
 }
-
 .studyMaterialTable td:first-child {
   border-radius: 10px 0 0 10px;
   font-weight: 500;
   color: #0a3d2b;
 }
-
 .studyMaterialTable td:last-child {
   border-radius: 0 10px 10px 0;
 }
 
-/* ── Action Button (ONLY VIEW NOW) ── */
+/* ── NEW Badge ── */
+.newBadge {
+  display: inline-block;
+  background: #fff3cd;
+  color: #856404;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+  letter-spacing: 0.03em;
+}
+
+/* ── Files Badge ── */
+.filesBadgeCell {
+  text-align: center;
+}
+.filesBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8f4f4;
+  color: #0f6e56;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 3px 10px;
+  min-width: 28px;
+}
+
+/* ── Action Button ── */
 .studyMaterialActions {
   display: flex;
   justify-content: flex-end;
@@ -154,16 +204,38 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition: background 0.2s, transform 0.15s, opacity 0.2s;
 }
-
 .studyMaterialViewBtn:hover {
   background: #0f6e56;
   transform: translateY(-1px);
 }
-
 .studyMaterialViewBtn:active {
   transform: scale(0.96);
+}
+.studyMaterialViewBtn.loading {
+  background: #085041;
+  opacity: 0.8;
+  cursor: default;
+  transform: none;
+}
+
+/* ── Empty State ── */
+.emptyRow td {
+  background: transparent !important;
+}
+.emptyState {
+  text-align: center;
+  padding: 36px 0;
+  color: #4a8c72;
+}
+.emptyIcon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+.emptyState p {
+  font-size: 14px;
 }
 
 /* ── Mobile ── */
@@ -172,8 +244,23 @@
 @media (max-width: 768px) {
 
   .studyMaterialTableWrap { display: none; }
-
   .studyMaterialMobile { display: block; }
+
+  .studyMaterialMobileHeader {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: #4a8c72;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0 4px 8px;
+  }
+
+  @keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
   .studyMaterialCard {
     background: #177e86;
@@ -181,11 +268,43 @@
     padding: 14px;
     border-radius: 14px;
     margin-bottom: 12px;
+    animation: cardFadeIn 0.35s ease both;
   }
 
   .studyMaterialCardTop {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .studyMaterialCardTitle {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .studyMaterialCardDate {
+    font-size: 12px;
+    opacity: 0.8;
+    white-space: nowrap;
+  }
+
+  .studyMaterialCardChapter {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-bottom: 10px;
+  }
+
+  .studyMaterialCardActions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .filesBadgeMobile {
+    font-size: 11px;
+    opacity: 0.8;
   }
 
   .viewBtn {
@@ -196,5 +315,14 @@
     color: white;
     font-size: 12px;
     font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .viewBtn:active {
+    background: #27ae60;
+  }
+  .viewBtn.loading {
+    background: #1e8449;
+    cursor: default;
   }
 }
