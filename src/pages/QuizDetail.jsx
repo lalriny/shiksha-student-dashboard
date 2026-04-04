@@ -95,10 +95,11 @@ export default function QuizDetail() {
   }, [quizId, subjectId, navigate]);
 
   // ── timer ─────────────────────────────────────────────────────────────────
-  
+  console.log("START:", startTimeRef.current);
+console.log("DURATION:", durationRef.current);
 
  useEffect(() => {
-  if (timeLeft === null) return; // wait until timeLeft is set
+  if (!durationRef.current || !startTimeRef.current) return;
 
   const interval = setInterval(() => {
     const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
@@ -107,6 +108,7 @@ export default function QuizDetail() {
     if (remaining <= 0) {
       clearInterval(interval);
       setTimeLeft(0);
+
       if (!submittedRef.current) {
         submittedRef.current = true;
         handleAutoSubmit();
@@ -117,7 +119,7 @@ export default function QuizDetail() {
   }, 1000);
 
   return () => clearInterval(interval);
-}, [timeLeft === null, handleAutoSubmit]); // re-runs when timeLeft goes from null → number
+}, [handleAutoSubmit]);
 
   const fmtTime = (s) => {
     const h   = String(Math.floor(s / 3600)).padStart(2, "0");
