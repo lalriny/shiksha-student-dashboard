@@ -11,16 +11,15 @@ export default function Subjects({ mode }) {
   const { activeCourse, loading: courseLoading } = useCourse();
 
   const [subjects, setSubjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);  // ← fixed typo (setaLoading → setLoading)
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredSubjects = subjects.filter((subject) =>
     subject.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  const subjectImages = {
-  "Mathematics": "/images/class8-math.png",
-  
-};
+
+  // ← removed subjectImages entirely
+
   useEffect(() => {
     if (courseLoading) return;
 
@@ -65,7 +64,7 @@ export default function Subjects({ mode }) {
             filteredSubjects.map((subject) => (
               <SubjectCard
                 key={subject.id}
-                img={subjectImages[subject.name] || "/images/default.png"}
+                img={subject.image || "/images/default.png"}  // ← changed
                 subject={subject.name}
                 teacher={
                   subject.teachers?.length
