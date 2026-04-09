@@ -69,9 +69,16 @@
 }
 
 .subjectCard__title {
-  font-size: 14px;
+ font-size: 14px;
   font-weight: 700;
-  margin-bottom: 2px; /* ← was 4px, now tighter gap between title and teacher */
+  margin-bottom: 2px;
+  
+    display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;               /* ← add this line to fix the warning */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 36px;            /* ← forces same height even for 1-line titles */
 }
 
   .subjectCard__teacher {
