@@ -4,6 +4,7 @@ import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { useCourse } from "../contexts/CourseContext";
 import { useAuth } from "../contexts/AuthContext";
 import "../styles/header.css";
+import NotificationBell from "./NotificationBell";
 
 const DEFAULT_AVATAR =
   "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100";
@@ -118,6 +119,9 @@ export default function Header({ toggleMenu, menuOpen }) {
           </div>
         )}
       </div>
+
+      {/* Notification Bell */}
+      <NotificationBell />
 
       {/* Profile */}
       <div className="header__right" ref={profileRef}>
