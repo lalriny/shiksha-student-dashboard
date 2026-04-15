@@ -18,12 +18,12 @@ export default function SubjectsQuiz() {
 
   "english (it so happened)": "/images/eng.jpeg",
   "english (grammar)": "/images/eng.jpeg",
-  "english (honeydew )": "/images/eng.jpeg",
+  "english (honeydew)": "/images/eng.jpeg",
   "english (hornbill)": "/images/eng.jpeg",
   "english (vistas)": "/images/eng.jpeg",
   "english (flamingo)": "/images/eng.jpeg",
   "english (first flight)": "/images/eng.jpeg",
-  "english (footrpints without feet)": "/images/eng.jpeg",
+  "english (footprints without feet)": "/images/eng.jpeg",
   "english (snapshots)": "/images/eng.jpeg",
 
   "4a: english – honeydew (main reader)": "/images/eng.jpeg",
@@ -31,7 +31,7 @@ export default function SubjectsQuiz() {
   "4b: english – it so happened (supplementary reader)": "/images/eng.jpeg",
   "4b: english – supplementary (moments)": "/images/eng.jpeg",
   "4a: english – main reader (first flight)": "/images/eng.jpeg",
-  "4b: english – supplementary reader (footprints without feet)": "/images/eng.jpeg",
+  "4b: english – supplementary (footprints without feet)": "/images/eng.jpeg",
 
   "hindi - vasant iii + grammar (mil)": "/images/hindi.png",
   "hindi (aroh i)": "/images/hindi.png",
@@ -84,20 +84,20 @@ export default function SubjectsQuiz() {
   function getSubjectImage(subjectName) {
   const normalized = subjectName
     ?.toLowerCase()
-    .replace(/\s+/g, " ")   // remove extra spaces
-    .trim();
+    .replace(/[–—]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim() || "";
 
-  const sortedKeys = Object.keys(subjectImages).sort(
-    (a, b) => b.length - a.length
-  );
+  const normalizedMap = Object.entries(subjectImages).map(([key, value]) => [
+    key.toLowerCase().replace(/[–—]/g, "-").replace(/\s+/g, " ").trim(),
+    value,
+  ]);
 
-  const matchedKey = sortedKeys.find((key) =>
-    normalized.includes(key.toLowerCase())
-  );
+  const matched = normalizedMap
+    .sort((a, b) => b[0].length - a[0].length)
+    .find(([key]) => normalized.includes(key));
 
-  console.log("SUBJECT:", normalized, "MATCH:", matchedKey);
-
-  return matchedKey ? subjectImages[matchedKey] : "/images/default.png";
+  return matched ? matched[1] : "/images/default.png";
 }
 
   useEffect(() => {
